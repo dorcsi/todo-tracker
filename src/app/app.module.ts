@@ -3,13 +3,18 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http'
 import { AgGridModule } from 'ag-grid-angular';
 import { AppComponent } from './app.component';
+import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
+import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
  declarations: [
-   AppComponent
+   AppComponent,
+   DeleteRowRenderer,
+   DateTimeRenderer
  ],
  imports: [
    BrowserModule,
@@ -17,7 +22,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
    AgGridModule,
    NoopAnimationsModule,
    MatInputModule,
-   MatFormFieldModule
+   MatFormFieldModule,
+   FormsModule,
+   ReactiveFormsModule
  ],
  providers: [],
  bootstrap: [AppComponent]

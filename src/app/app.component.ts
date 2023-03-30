@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridReadyEvent } from 'ag-grid-community';
+import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
+import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -15,11 +17,11 @@ export class AppComponent {
 
     // Each Column Definition results in one Column.
     public columnDefs: ColDef[] = [
-        { field: 'deadline', headerName: 'Deadline', cellStyle: this.getCellStyle() },
-        { field: 'task' },
+        { field: 'deadline', headerName: 'Deadline', cellRenderer: DateTimeRenderer },
+        { field: 'task', cellStyle: this.getCellStyle() },
         { field: 'location' },
         { field: 'blocker' },
-        { field: 'isDone' }
+        { field: 'isDone', headerName: '', width: 15, cellRenderer: DeleteRowRenderer }
     ];
 
     // DefaultColDef sets props common to all Columns
@@ -29,9 +31,9 @@ export class AppComponent {
     };
 
     rowData = [
-        { deadline: "Toyota", task: "Celica", location: 35000, blocker: '' },
-        { deadline: "Ford", task: "Mondeo", location: 32000 },
-        { deadline: "Porsche", task: "Boxster", location: 72000 }
+        { deadline: "2023-03-23T09:30", task: "Boarding", location: 'BP Airport', blocker: '' },
+        { deadline: "2023-03-23T11:00", task: "Landing", location: 'LN Luton' },
+        { deadline: "2123-03-25T10:00", task: "Visit the British Museum", location: 'London' }
     ];
 
     // Example load data from server
@@ -46,8 +48,7 @@ export class AppComponent {
 
     getCellStyle() {
         return (params: CellClassParams): CellStyle => {
-            return { background: 'blue' }
+            return { background: 'lightblue' }
         }
     }
-
 }
