@@ -15,6 +15,7 @@ export class AppComponent {
     title = 'todo-project';
 
     private agGrid: any;
+    private fileReader = new window.FileReader();
 
     // Each Column Definition results in one Column.
     public columnDefs: ColDef[] = [
@@ -55,6 +56,20 @@ export class AppComponent {
                 return { background: '#d49b87' }
             }
             return { background: 'lightblue' }
+        }
+    }
+
+     openFile(){
+        (<HTMLElement>document.querySelector('input[name="fileInput"]'))!.click();
+    }
+
+    handle(event: any){
+        if(event.target.files.length > 0)
+        {
+            this.fileReader.readAsText(event.target.files[0]);
+            this.fileReader.onloadend = (event) => {
+                this.rowData = JSON.parse(event.target!.result! as string);
+            }
         }
     }
 }

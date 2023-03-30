@@ -1,8 +1,7 @@
 
-<mat-form-field>
-    <input matInput type="datetime-local" placeholder="start date">
-</mat-form-field>
-<i class="fa-solid fa-trash"></i>
+<i class="fa-solid fa-folder-open" (click)="openFile()">
+    <input type="file" style="display:none" (change)="handle($event)" name="fileInput">
+</i>
 <ag-grid-angular
    style="width: 100%; height: 100%"
    class="ag-theme-alpine"
