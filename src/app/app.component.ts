@@ -4,6 +4,7 @@ import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridReadyEvent } 
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
 import { Observable } from 'rxjs';
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-root',
@@ -48,6 +49,11 @@ export class AppComponent {
 
     getCellStyle() {
         return (params: CellClassParams): CellStyle => {
+            let m = moment(params.data.deadline);
+            let mt = moment();
+            if(m < moment()){
+                return { background: '#d49b87' }
+            }
             return { background: 'lightblue' }
         }
     }
