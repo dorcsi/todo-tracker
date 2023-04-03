@@ -5,6 +5,7 @@ import { FormControl } from '@angular/forms';
 
 @Component({
    selector: 'date-time-renderer',
+   styleUrls: ['./date-time-renderer.component.scss'],
    templateUrl: './date-time-renderer.component.html'
    /*template: `
          <mat-form-field>
@@ -26,12 +27,16 @@ export class DateTimeRenderer implements ICellRendererAngularComp {
         this.dateTimeValue = params.value;
         this.dateTimeFormControl.setValue(this.dateTimeValue);
         this.dateTimeFormControl.valueChanges.subscribe(value => {
-            console.log('date-time change!! ' + value);
+            this.rowNode.data.deadline = value;
         });
     }
 
     // gets called whenever the cell refreshes
     refresh(params: ICellRendererParams): boolean {
         return true;
+    }
+
+    dateEditFinished(){
+        this.gridApi.redrawRows({ rowNodes: [this.rowNode] });
     }
 }

@@ -1,35 +1,47 @@
-import { Component } from '@angular/core';
-import { AgGridAngular } from 'ag-grid-angular';
-import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridReadyEvent } from 'ag-grid-community';
+import { Component, OnInit } from '@angular/core';
+import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi } from 'ag-grid-community';
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
 import { Observable } from 'rxjs';
 import * as moment from 'moment';
+// import * as _ from 'lodash';
+
+export interface todoAPI{
+    deadline: string,
+    task: string,
+    location: string,
+    blocker: string,
+    taskDeleteCol: string
+}
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
     title = 'todo-project';
 
-    private agGrid: any;
+    private gridApi!: GridApi;
     private fileReader = new window.FileReader();
+    gridOptions: GridOptions = {
+        singleClickEdit: true
+    };
 
     // Each Column Definition results in one Column.
     public columnDefs: ColDef[] = [
-        { field: 'deadline', headerName: 'Deadline', cellRenderer: DateTimeRenderer },
+        { field: 'deadline', headerName: 'Deadline', cellRenderer: DateTimeRenderer, sort: 'asc', editable: false },
         { field: 'task', cellStyle: this.getCellStyle() },
         { field: 'location' },
         { field: 'blocker' },
-        { field: 'isDone', headerName: '', width: 15, cellRenderer: DeleteRowRenderer }
+        { field: 'taskDeleteCol', headerName: '', width: 15, editable: false, cellRenderer: DeleteRowRenderer }
     ];
 
     // DefaultColDef sets props common to all Columns
     public defaultColDef: ColDef = {
         sortable: true,
         filter: true,
+        editable: true
     };
 
     rowData = [
@@ -38,9 +50,22 @@ export class AppComponent {
         { deadline: "2123-03-25T10:00", task: "Visit the British Museum", location: 'London' }
     ];
 
+    constructor(){}
+
+    ngOnInit() {
+        this.columnDefs.forEach(colDef =>{
+            colDef.valueFormatter = this.getValueFormatter()
+        });
+    }
+
     // Example load data from server
     onGridReady(params: GridReadyEvent) {
-        this.agGrid = params.api;
+        this.gridApi = params.api;
+        this.clearInputRow();
+    }
+
+    clearInputRow() {
+        this.gridApi.setPinnedTopRowData([{deadline: moment().format('YYYY-MM-DDTHH:mm')}]);
     }
 
     // Example of consuming Grid Event
@@ -50,6 +75,9 @@ export class AppComponent {
 
     getCellStyle() {
         return (params: CellClassParams): CellStyle => {
+            if(params.node.isRowPinned()){
+                return {};
+            }
             let m = moment(params.data.deadline);
             let mt = moment();
             if(m < moment()){
@@ -59,11 +87,11 @@ export class AppComponent {
         }
     }
 
-     openFile(){
+    openFile(){
         (<HTMLElement>document.querySelector('input[name="fileInput"]'))!.click();
     }
 
-    handle(event: any){
+    handleOpenFile(event: any){
         if(event.target.files.length > 0)
         {
             this.fileReader.readAsText(event.target.files[0]);
@@ -71,5 +99,29 @@ export class AppComponent {
                 this.rowData = JSON.parse(event.target!.result! as string);
             }
         }
+    }
+
+    saveFile() {
+        (<any>document.getElementById('fileDownload')).href = this.getDownloadableContent();
+        (<HTMLElement>document.getElementById('fileDownload'))!.click();
+    }
+
+    getValueFormatter = () => {
+        return (params: ValueFormatterParams): string => {
+            return this.isEmptyPinnedCell(params) ? '' : params.value
+        };
+    }
+
+    private isEmptyPinnedCell(params: ValueFormatterParams) {
+        return (
+          (params.node?.rowPinned === 'top' && params.value == null) ||
+          (params.node?.rowPinned === 'top' && params.value == '')
+        );
+    }
+
+    getDownloadableContent(){
+        let rowData: Array<todoAPI> = [];
+        this.gridApi.forEachNode(node => rowData.push(node.data));
+        return "data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(rowData));
     }
 }
