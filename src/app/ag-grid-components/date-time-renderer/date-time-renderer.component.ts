@@ -1,7 +1,9 @@
 import {Component} from "@angular/core";
 import {ICellRendererAngularComp} from 'ag-grid-angular';
-import {ICellRendererParams, GridApi,  IRowNode} from "ag-grid-community";
+import {ICellRendererParams, GridApi,  IRowNode, Column} from "ag-grid-community";
 import { FormControl } from '@angular/forms';
+import { MessagingService } from '../../messaging-service/messaging.service';
+import { TodoAPI } from '../../app.component'
 
 @Component({
    selector: 'date-time-renderer',
@@ -19,6 +21,8 @@ export class DateTimeRenderer implements ICellRendererAngularComp {
     dateTimeFormControl: FormControl = new FormControl();
     dateTimeValue = '';
 
+    constructor(private messagingService: MessagingService){
+    }
 
     // gets called once before the renderer is used
     agInit(params: ICellRendererParams): void {
@@ -38,5 +42,9 @@ export class DateTimeRenderer implements ICellRendererAngularComp {
 
     dateEditFinished(){
         this.gridApi.redrawRows({ rowNodes: [this.rowNode] });
+        this.gridApi.onSortChanged();
+        let rowData: Array<TodoAPI> = [];
+        this.gridApi.forEachNode(node => rowData.push(node.data));
+        this.messagingService.next({event: 'resetTableEvent', msg: rowData});
     }
 }

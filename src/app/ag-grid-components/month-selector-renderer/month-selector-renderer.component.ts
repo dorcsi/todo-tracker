@@ -18,7 +18,6 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
     monthLabel = moment().format('MMMM');
 
     constructor(private messagingService: MessagingService){
-
     }
 
     // gets called once before the renderer is used
@@ -34,12 +33,12 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
     getNextMonth(){
         this.monthOffset++;
         this.monthLabel = moment().add(this.monthOffset, 'month').format('MMMM');
-        this.messagingService.next(this.monthOffset);
+        this.messagingService.next({event: 'monthChangeEvent', msg: this.monthOffset});
     }
 
     getPrevMonth(){
         this.monthOffset--;
         this.monthLabel = moment().add(this.monthOffset, 'month').format('MMMM');
-        this.messagingService.next(this.monthOffset);
+        this.messagingService.next({event: 'monthChangeEvent', msg: this.monthOffset});
     }
 }

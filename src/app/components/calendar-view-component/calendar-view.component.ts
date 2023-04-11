@@ -4,7 +4,7 @@ import { TodoAPI } from '../../app.component'
 import { MonthSelectorRenderer } from './../../ag-grid-components/month-selector-renderer/month-selector-renderer.component';
 import { MessagingService } from '../../messaging-service/messaging.service';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import * as moment from 'moment';
 
 export interface CalendarDates {
@@ -29,6 +29,9 @@ export class CalendarViewComponent implements OnInit {
     frameworkComponents!: any;
     private monthOffset = 0;
     private readonly _unsubscribeMonthChange = new Subject<number>();
+    private readonly _unsubscribeRowDelete = new Subject<number>();
+    private readonly _unsubscribeRowAdd = new Subject<number>();
+    private readonly _unsubscribeTableReset = new Subject<number>();
 
     public columnDefs: ColGroupDef[] = [
         {
@@ -54,9 +57,22 @@ export class CalendarViewComponent implements OnInit {
     };
 
     constructor(private messagingService: MessagingService){
-        this.messagingService.pipe(takeUntil(this._unsubscribeMonthChange)).subscribe(x => {
-            this.monthOffset = x;
-            this.fillDayCells(x)
+        this.messagingService.pipe(filter(x => x.event === 'monthChangeEvent'), takeUntil(this._unsubscribeMonthChange)).subscribe(x => {
+            this.monthOffset = x.msg as number;
+            this.fillDayCells(this.monthOffset);
+        });
+        this.messagingService.pipe(filter(x => x.event === 'deleteRowEvent'), takeUntil(this._unsubscribeRowDelete)).subscribe(x => {
+            this.taskCnt[(x.msg as string).split('T')[0]]--;
+            this.gridApi.redrawRows();
+        });
+        this.messagingService.pipe(filter(x => x.event === 'addRowEvent'), takeUntil(this._unsubscribeRowAdd)).subscribe(x => {
+            const date = (x.msg as string).split('T')[0];
+            this.taskCnt[date] = (this.taskCnt[date] ?? 0) + 1;
+            this.gridApi.redrawRows();
+        });
+        this.messagingService.pipe(filter(x => x.event === 'resetTableEvent'), takeUntil(this._unsubscribeTableReset)).subscribe(x => {
+            this.countTasks(x.msg as Array<TodoAPI>);
+            this.gridApi.redrawRows();
         });
     }
 
@@ -64,15 +80,22 @@ export class CalendarViewComponent implements OnInit {
         this.frameworkComponents = {
             'monthSelectorRenderer': MonthSelectorRenderer
         }
-        this.taskCnt = {};
-        this.todoItems.forEach(todo => {
-            const date = todo.deadline.split('T')[0];
-            this.taskCnt[date] = (this.taskCnt[date] ?? 0) + 1;
-        });
+        this.countTasks();
     }
 
     ngOnDestroy() {
         this._unsubscribeMonthChange.complete();
+        this._unsubscribeRowDelete.complete();
+        this._unsubscribeRowAdd.complete();
+        this._unsubscribeTableReset.complete();
+    }
+
+    private countTasks(data?: Array<TodoAPI>) {
+        this.taskCnt = {};
+        (data ?? this.todoItems).forEach(todo => {
+            const date = todo.deadline.split('T')[0];
+            this.taskCnt[date] = (this.taskCnt[date] ?? 0) + 1;
+        });
     }
 
     onGridReady(params: GridReadyEvent) {
@@ -107,9 +130,9 @@ export class CalendarViewComponent implements OnInit {
                 style['border'] = '1px solid';
                 style['font-weight'] = 'bold';
             }
-            if(this.taskCnt[params.value.split('T')[0]] !== undefined){
+            if(![undefined, 0].includes(this.taskCnt[params.value.split('T')[0]])){
                 switch(this.taskCnt[params.value.split('T')[0]]){
-                    case 4: {style['background'] = '#e8df4f'; break;}
+                    case 4: {style['background'] = '#f0ec4f'; break;}
                     case 3: {style['background'] = '#e8e174'; break;}
                     case 2: {style['background'] = '#ebe69d'; break;}
                     case 1: {style['background'] = '#faf9ca'; break;}

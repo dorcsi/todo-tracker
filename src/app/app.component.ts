@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi } from 'ag-grid-community';
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
+import { MessagingService } from './messaging-service/messaging.service';
 import * as moment from 'moment';
 // import * as _ from 'lodash';
 
@@ -43,14 +44,14 @@ export class AppComponent implements OnInit {
         editable: true
     };
 
-    rowData = [
+    rowData: TodoAPI[] = [
         { deadline: "2023-04-23T09:30", task: "Boarding", location: 'BP Airport', blocker: '' },
         { deadline: "2023-04-23T11:00", task: "Landing", location: 'LN Luton' },
         { deadline: "2023-04-25T11:00", task: "Landing", location: 'LN Luton' },
         { deadline: "2123-03-25T10:00", task: "Visit the British Museum", location: 'London' }
     ];
 
-    constructor(){}
+    constructor(private messagingService: MessagingService){ }
 
     ngOnInit() {
         this.columnDefs.forEach(colDef => {
@@ -97,6 +98,7 @@ export class AppComponent implements OnInit {
             this.fileReader.readAsText(event.target.files[0]);
             this.fileReader.onloadend = (event) => {
                 this.rowData = JSON.parse(event.target!.result! as string);
+                this.messagingService.next({event: 'resetTableEvent', msg: this.rowData});
             }
         }
     }
