@@ -1,7 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi } from 'ag-grid-community';
+import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi, ColGroupDef } from 'ag-grid-community';
 import { TodoAPI } from '../../app.component'
-import { Observable } from 'rxjs';
+import { MonthSelectorRenderer } from './../../ag-grid-components/month-selector-renderer/month-selector-renderer.component';
+import { MessagingService } from '../../messaging-service/messaging.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import * as moment from 'moment';
 
 export interface CalendarDates {
@@ -23,15 +26,24 @@ export class CalendarViewComponent implements OnInit {
     private gridApi!: GridApi;
     private taskCnt: any;
     rowData!: Array<CalendarDates>;
+    frameworkComponents!: any;
+    private monthOffset = 0;
+    private readonly _unsubscribeMonthChange = new Subject<number>();
 
-    public columnDefs: ColDef[] = [
-        { field: 'monday', headerName: 'Monday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-        { field: 'tuesday', headerName: 'Tuesday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-        { field: 'wednesday', headerName: 'Wednesday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-        { field: 'thursday', headerName: 'Thursday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-        { field: 'friday', headerName: 'Friday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-        { field: 'saturday', headerName: 'Saturday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-        { field: 'sunday', headerName: 'Sunday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() }
+    public columnDefs: ColGroupDef[] = [
+        {
+            headerName: 'April',
+            headerGroupComponent: 'monthSelectorRenderer',
+            children: [
+                { field: 'monday', headerName: 'Monday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'tuesday', headerName: 'Tuesday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'wednesday', headerName: 'Wednesday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'thursday', headerName: 'Thursday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'friday', headerName: 'Friday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'saturday', headerName: 'Saturday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'sunday', headerName: 'Sunday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() }
+            ]
+        }
     ];
 
     public defaultColDef: ColDef = {
@@ -41,14 +53,26 @@ export class CalendarViewComponent implements OnInit {
         width: 120
     };
 
-    constructor(){}
+    constructor(private messagingService: MessagingService){
+        this.messagingService.pipe(takeUntil(this._unsubscribeMonthChange)).subscribe(x => {
+            this.monthOffset = x;
+            this.fillDayCells(x)
+        });
+    }
 
     ngOnInit() {
+        this.frameworkComponents = {
+            'monthSelectorRenderer': MonthSelectorRenderer
+        }
         this.taskCnt = {};
         this.todoItems.forEach(todo => {
             const date = todo.deadline.split('T')[0];
             this.taskCnt[date] = (this.taskCnt[date] ?? 0) + 1;
         });
+    }
+
+    ngOnDestroy() {
+        this._unsubscribeMonthChange.complete();
     }
 
     onGridReady(params: GridReadyEvent) {
@@ -76,7 +100,7 @@ export class CalendarViewComponent implements OnInit {
     getCellStyle() {
         return (params: CellClassParams): CellStyle => {
             let style = <CellStyle>{};
-            if(params.value.split('-')[1] !== moment().format('MM')){
+            if(params.value.split('-')[1] !== moment().add(this.monthOffset, 'month').format('MM')){
                 style['color'] = 'lightgray';
             }
             if(params.value === moment().format('YYYY-MM-DD')){
