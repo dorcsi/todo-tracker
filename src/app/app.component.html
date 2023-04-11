@@ -5,13 +5,19 @@
 <i style="margin-left: 20px;" class="fa-solid fa-save" (click)="saveFile()">
     <a download="todos.json" style="display:none" id="fileDownload" click="getDownloadableContent()"></a>
 </i>
-<ag-grid-angular
-   style="width: 100%; height: 100%"
-   class="ag-theme-alpine"
-   [gridOptions]="gridOptions"
-   [columnDefs]="columnDefs"
-   [defaultColDef]="defaultColDef"
-   [rowData]="rowData"
-   [rowSelection]="'multiple'"
-   (gridReady)="onGridReady($event)"
-   (cellClicked)="onCellClicked($event)"></ag-grid-angular>
+<div class="details-container">
+    <ag-grid-angular
+        style="width: 100%; height: 100%"
+        class="ag-theme-alpine"
+        [gridOptions]="gridOptions"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowData]="rowData"
+        [rowSelection]="'multiple'"
+        (gridReady)="onGridReady($event)"
+        (cellClicked)="onCellClicked($event)">
+    </ag-grid-angular>
+    <calendar-view
+        [todoItems]="rowData">
+    </calendar-view>
+</div>

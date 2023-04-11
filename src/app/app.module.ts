@@ -5,6 +5,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import { AppComponent } from './app.component';
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
+import { CalendarViewComponent } from './components/calendar-view-component/calendar-view.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +15,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
  declarations: [
    AppComponent,
    DeleteRowRenderer,
-   DateTimeRenderer
+   DateTimeRenderer,
+   CalendarViewComponent
  ],
  imports: [
    BrowserModule,

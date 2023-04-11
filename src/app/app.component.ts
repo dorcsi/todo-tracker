@@ -2,16 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi } from 'ag-grid-community';
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
-import { Observable } from 'rxjs';
 import * as moment from 'moment';
 // import * as _ from 'lodash';
 
-export interface todoAPI{
+export interface TodoAPI {
     deadline: string,
     task: string,
     location: string,
-    blocker: string,
-    taskDeleteCol: string
+    blocker?: string,
+    taskDeleteCol?: string
 }
 
 @Component({
@@ -45,15 +44,16 @@ export class AppComponent implements OnInit {
     };
 
     rowData = [
-        { deadline: "2023-03-23T09:30", task: "Boarding", location: 'BP Airport', blocker: '' },
-        { deadline: "2023-03-23T11:00", task: "Landing", location: 'LN Luton' },
+        { deadline: "2023-04-23T09:30", task: "Boarding", location: 'BP Airport', blocker: '' },
+        { deadline: "2023-04-23T11:00", task: "Landing", location: 'LN Luton' },
+        { deadline: "2023-04-25T11:00", task: "Landing", location: 'LN Luton' },
         { deadline: "2123-03-25T10:00", task: "Visit the British Museum", location: 'London' }
     ];
 
     constructor(){}
 
     ngOnInit() {
-        this.columnDefs.forEach(colDef =>{
+        this.columnDefs.forEach(colDef => {
             colDef.valueFormatter = this.getValueFormatter()
         });
     }
@@ -120,7 +120,7 @@ export class AppComponent implements OnInit {
     }
 
     getDownloadableContent(){
-        let rowData: Array<todoAPI> = [];
+        let rowData: Array<TodoAPI> = [];
         this.gridApi.forEachNode(node => rowData.push(node.data));
         return "data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(rowData));
     }
