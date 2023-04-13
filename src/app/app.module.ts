@@ -10,6 +10,7 @@ import { MonthSelectorRenderer } from './ag-grid-components/month-selector-rende
 import { MessagingService } from './messaging-service/messaging.service'
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -27,6 +28,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
    AgGridModule,
    NoopAnimationsModule,
    MatInputModule,
+   MatSelectModule,
    MatFormFieldModule,
    FormsModule,
    ReactiveFormsModule
