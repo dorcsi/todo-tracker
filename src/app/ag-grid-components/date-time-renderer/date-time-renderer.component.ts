@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {ICellRendererAngularComp} from 'ag-grid-angular';
 import {ICellRendererParams, GridApi,  IRowNode, Column} from "ag-grid-community";
 import { FormControl } from '@angular/forms';
-import { MessagingService } from '../../messaging-service/messaging.service';
+import { MessagingService, MESSAGETYPES } from '../../messaging-service/messaging.service';
 import { TodoAPI } from '../../app.component'
 
 @Component({
@@ -45,6 +45,6 @@ export class DateTimeRenderer implements ICellRendererAngularComp {
         this.gridApi.onSortChanged();
         let rowData: Array<TodoAPI> = [];
         this.gridApi.forEachNode(node => rowData.push(node.data));
-        this.messagingService.next({event: 'resetTableEvent', msg: rowData});
+        this.messagingService.next({event: MESSAGETYPES.RESET_TABLE_EVENT, msg: rowData});
     }
 }

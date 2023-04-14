@@ -3,9 +3,22 @@
         width: 100%;
         height: 100%;
         display: flex;
+        gap: 10px;
         flex-direction: row;
-        ag-grid-angular, calendar-view {
-            flex-basis: 50%;
+        .task-grid{
+            width: calc(100% - 510px);
+            height: 100%;
+        }
+        .right-panel{
+            width: 492px;
+            background-image: url("../assets/images/springbg.png");
+            background-repeat:  no-repeat;
+            background-position:  right bottom;
+            background-size: cover;
+        }
+        calendar-view {
+            display: block;
+            height: 330px;
         }
     }
 }

@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi } from 'ag-grid-community';
+import { CellClassParams, CellClickedEvent, CellStyle, RowStyle, RowClassParams, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi, ITooltipParams } from 'ag-grid-community';
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
-import { MessagingService } from './messaging-service/messaging.service';
+import { MessagingService, MESSAGETYPES } from './messaging-service/messaging.service';
 import * as moment from 'moment';
+import { takeUntil, filter } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 // import * as _ from 'lodash';
 
 export interface TodoAPI {
@@ -20,20 +22,24 @@ export interface TodoAPI {
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-    title = 'todo-project';
+    title = 'Todo Tracker';
 
     private gridApi!: GridApi;
     private fileReader = new window.FileReader();
+    private readonly _unsubscribeDateHoverChange = new Subject<number>();
+    private dateHovered!: string;
     gridOptions: GridOptions = {
-        singleClickEdit: true
+        singleClickEdit: true,
+        getRowStyle: this.getRowStyle(),
+        tooltipShowDelay: 0
     };
 
     // Each Column Definition results in one Column.
     public columnDefs: ColDef[] = [
-        { field: 'deadline', headerName: 'Deadline', cellRenderer: DateTimeRenderer, sort: 'asc', editable: false },
-        { field: 'task', cellStyle: this.getCellStyle() },
+        { field: 'deadline', headerName: 'Deadline', cellRenderer: DateTimeRenderer, sort: 'asc', editable: false, width: 100 },
+        { field: 'task', cellStyle: this.getCellStyle(), tooltipField: 'task' },
         { field: 'location' },
-        { field: 'blocker' },
+        { field: 'blocker', width: 80 },
         { field: 'taskDeleteCol', headerName: '', width: 15, editable: false, cellRenderer: DeleteRowRenderer }
     ];
 
@@ -51,21 +57,31 @@ export class AppComponent implements OnInit {
         { deadline: "2123-03-25T10:00", task: "Visit the British Museum", location: 'London' }
     ];
 
-    constructor(private messagingService: MessagingService){ }
+    constructor(private messagingService: MessagingService){
+        this.messagingService.pipe(filter(x => x.event === MESSAGETYPES.DATE_HOVER_EVENT,), takeUntil(this._unsubscribeDateHoverChange)).subscribe(x => {
+            this.dateHovered = x.msg as string;
+            this.gridApi.redrawRows();
+        });
+    }
 
     ngOnInit() {
         this.columnDefs.forEach(colDef => {
-            colDef.valueFormatter = this.getValueFormatter()
+            colDef.valueFormatter = this.getValueFormatter();
         });
+    }
+
+    ngOnDestroy() {
+        this._unsubscribeDateHoverChange.complete();
     }
 
     // Example load data from server
     onGridReady(params: GridReadyEvent) {
         this.gridApi = params.api;
         this.clearInputRow();
+        this.gridApi.sizeColumnsToFit()
     }
 
-    clearInputRow() {
+    private clearInputRow() {
         this.gridApi.setPinnedTopRowData([{deadline: moment().format('YYYY-MM-DDTHH:mm')}]);
     }
 
@@ -74,18 +90,36 @@ export class AppComponent implements OnInit {
         console.log('cellClicked', e);
     }
 
-    getCellStyle() {
+    private getCellStyle() {
         return (params: CellClassParams): CellStyle => {
             if(params.node.isRowPinned()){
                 return {};
             }
             let m = moment(params.data.deadline);
-            let mt = moment();
-            if(m < moment()){
-                return { background: '#d49b87' }
+            if(m.format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')){
+                return { background: '#a9d6cc' }
+            } else if(m < moment()){
+                return { background: '#f7e4dc' }
             }
-            return { background: 'lightblue' }
+            return { background: '#d7f4fa' }
         }
+    }
+
+    private getRowStyle(){
+        return (params: RowClassParams): RowStyle => {
+            if(params.node.isRowPinned()){
+                return {};
+            }
+            let m = moment(params.data.deadline).format('YYYY-MM-DD');
+            if(m === this.dateHovered){
+                return { background: 'lightgray' }
+            }
+            return {}
+        }
+    }
+
+    private getTooltipValue(params:any){
+        return 'hi'
     }
 
     openFile(){
@@ -98,7 +132,7 @@ export class AppComponent implements OnInit {
             this.fileReader.readAsText(event.target.files[0]);
             this.fileReader.onloadend = (event) => {
                 this.rowData = JSON.parse(event.target!.result! as string);
-                this.messagingService.next({event: 'resetTableEvent', msg: this.rowData});
+                this.messagingService.next({event: MESSAGETYPES.RESET_TABLE_EVENT, msg: this.rowData});
             }
         }
     }
@@ -108,7 +142,7 @@ export class AppComponent implements OnInit {
         (<HTMLElement>document.getElementById('fileDownload'))!.click();
     }
 
-    getValueFormatter = () => {
+    private getValueFormatter = () => {
         return (params: ValueFormatterParams): string => {
             return this.isEmptyPinnedCell(params) ? '' : params.value
         };

@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
  declarations: [
@@ -31,7 +32,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
    MatSelectModule,
    MatFormFieldModule,
    FormsModule,
-   ReactiveFormsModule
+   ReactiveFormsModule,
+   BrowserAnimationsModule
  ],
  providers: [MessagingService],
  bootstrap: [AppComponent]

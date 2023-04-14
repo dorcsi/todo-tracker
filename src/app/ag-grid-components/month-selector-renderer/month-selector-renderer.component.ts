@@ -1,10 +1,9 @@
 import {Component} from "@angular/core";
 import {ICellRendererAngularComp} from 'ag-grid-angular';
 import {ICellRendererParams, GridApi,  IRowNode} from "ag-grid-community";
-import { MessagingService } from '../../messaging-service/messaging.service';
+import { MessagingService, MESSAGETYPES } from '../../messaging-service/messaging.service';
 import { FormControl } from '@angular/forms';
 import * as moment from 'moment';
-import { throwError } from "rxjs";
 
 export interface monthsAPI {
     name: string;
@@ -45,13 +44,13 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
         this.monthSelectorFormControl.valueChanges.subscribe(value => {
             this.monthOffset += value - this.focusedMonth;
             this.focusedMonth = value;
-            this.messagingService.next({event: 'monthChangeEvent', msg: this.monthOffset});
+            this.messagingService.next({event: MESSAGETYPES.MONTH_CHANGE_EVENT, msg: this.monthOffset});
         });
         this.yearSelectorFormControl.setValue(this.focusedYear);
         this.yearSelectorFormControl.valueChanges.subscribe(value => {
             this.monthOffset += (value - this.focusedYear) * 12;
             this.focusedYear = value;
-            this.messagingService.next({event: 'monthChangeEvent', msg: this.monthOffset});
+            this.messagingService.next({event: MESSAGETYPES.MONTH_CHANGE_EVENT, msg: this.monthOffset});
         });
     }
 
@@ -70,7 +69,7 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
         else{
             this.focusedMonth++;
         }
-        this.messagingService.next({event: 'monthChangeEvent', msg: this.monthOffset});
+        this.messagingService.next({event: MESSAGETYPES.MONTH_CHANGE_EVENT, msg: this.monthOffset});
         this.monthSelectorFormControl.setValue(this.focusedMonth);
     }
 
@@ -84,7 +83,7 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
         else{
             this.focusedMonth--;
         }
-        this.messagingService.next({event: 'monthChangeEvent', msg: this.monthOffset});
+        this.messagingService.next({event: MESSAGETYPES.MONTH_CHANGE_EVENT, msg: this.monthOffset});
         this.monthSelectorFormControl.setValue(this.focusedMonth);
     }
 }

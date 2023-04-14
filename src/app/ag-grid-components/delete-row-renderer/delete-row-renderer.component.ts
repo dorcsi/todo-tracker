@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 import {ICellRendererAngularComp} from 'ag-grid-angular';
 import {ICellRendererParams, GridApi,  IRowNode} from "ag-grid-community";
-import { MessagingService } from '../../messaging-service/messaging.service';
+import { MessagingService, MESSAGETYPES } from '../../messaging-service/messaging.service';
 import * as moment from 'moment';
 
 @Component({
@@ -35,10 +35,10 @@ export class DeleteRowRenderer implements ICellRendererAngularComp {
         if (this.isPinnedRow){
             this.gridApi.applyTransaction({add: [this.rowNode.data]});
             this.gridApi.setPinnedTopRowData([{deadline: moment().format('YYYY-MM-DDTHH:mm')}]);
-            this.messagingService.next({event: 'addRowEvent', msg: this.rowNode.data.deadline});
+            this.messagingService.next({event: MESSAGETYPES.ADD_ROW_EVENT, msg: this.rowNode.data.deadline});
         }
         else if (window.confirm(`Do you really want to remove this item? ${this.rowNode.data.task}`)) {
-            this.messagingService.next({event: 'deleteRowEvent', msg: this.rowNode.data.deadline});
+            this.messagingService.next({event: MESSAGETYPES.DELETE_ROW_EVENT, msg: this.rowNode.data.deadline});
             this.gridApi.applyTransaction({remove: [this.rowNode.data]});
         }
     }

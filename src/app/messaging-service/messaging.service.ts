@@ -7,6 +7,14 @@ export interface TodoMessagingAPI {
     msg: number | string | Array<TodoAPI>;
 }
 
+export enum MESSAGETYPES{
+    RESET_TABLE_EVENT = 'resetTableEvent',
+    ADD_ROW_EVENT = 'addRowEvent',
+    DELETE_ROW_EVENT = 'deleteRowEvent',
+    MONTH_CHANGE_EVENT = 'monthChangeEvent',
+    DATE_HOVER_EVENT = 'dateHoverEvent'
+}
+
 @Injectable({
   providedIn: 'root',
 })

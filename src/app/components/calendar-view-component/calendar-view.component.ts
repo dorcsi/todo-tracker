@@ -1,8 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridOptions, GridReadyEvent, ValueFormatterParams, GridApi, ColGroupDef } from 'ag-grid-community';
+import { CellClassParams, CellClickedEvent, CellStyle, ColDef, GridReadyEvent, ValueFormatterParams, GridApi, ColGroupDef, CellMouseOverEvent } from 'ag-grid-community';
 import { TodoAPI } from '../../app.component'
 import { MonthSelectorRenderer } from './../../ag-grid-components/month-selector-renderer/month-selector-renderer.component';
-import { MessagingService } from '../../messaging-service/messaging.service';
+import { MessagingService, MESSAGETYPES } from '../../messaging-service/messaging.service';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import * as moment from 'moment';
@@ -19,6 +19,7 @@ export interface CalendarDates {
 
 @Component({
     selector: 'calendar-view',
+    styleUrls: ['./calendar-view.component.scss'],
     templateUrl: './calendar-view.component.html'
 })
 export class CalendarViewComponent implements OnInit {
@@ -38,13 +39,13 @@ export class CalendarViewComponent implements OnInit {
             headerName: 'April',
             headerGroupComponent: 'monthSelectorRenderer',
             children: [
-                { field: 'monday', headerName: 'Monday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-                { field: 'tuesday', headerName: 'Tuesday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-                { field: 'wednesday', headerName: 'Wednesday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-                { field: 'thursday', headerName: 'Thursday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-                { field: 'friday', headerName: 'Friday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-                { field: 'saturday', headerName: 'Saturday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
-                { field: 'sunday', headerName: 'Sunday', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() }
+                { field: 'monday', headerName: 'Mon', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'tuesday', headerName: 'Tue', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'wednesday', headerName: 'Wed', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'thursday', headerName: 'Thu', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'friday', headerName: 'Fri', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'saturday', headerName: 'Sat', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() },
+                { field: 'sunday', headerName: 'Sun', cellStyle: this.getCellStyle(), valueFormatter: this.getValueFormatter() }
             ]
         }
     ];
@@ -53,24 +54,24 @@ export class CalendarViewComponent implements OnInit {
         sortable: false,
         filter: false,
         editable: false,
-        width: 120
+        width: 70
     };
 
     constructor(private messagingService: MessagingService){
-        this.messagingService.pipe(filter(x => x.event === 'monthChangeEvent'), takeUntil(this._unsubscribeMonthChange)).subscribe(x => {
+        this.messagingService.pipe(filter(x => x.event === MESSAGETYPES.MONTH_CHANGE_EVENT), takeUntil(this._unsubscribeMonthChange)).subscribe(x => {
             this.monthOffset = x.msg as number;
             this.fillDayCells(this.monthOffset);
         });
-        this.messagingService.pipe(filter(x => x.event === 'deleteRowEvent'), takeUntil(this._unsubscribeRowDelete)).subscribe(x => {
+        this.messagingService.pipe(filter(x => x.event === MESSAGETYPES.DELETE_ROW_EVENT), takeUntil(this._unsubscribeRowDelete)).subscribe(x => {
             this.taskCnt[(x.msg as string).split('T')[0]]--;
             this.gridApi.redrawRows();
         });
-        this.messagingService.pipe(filter(x => x.event === 'addRowEvent'), takeUntil(this._unsubscribeRowAdd)).subscribe(x => {
+        this.messagingService.pipe(filter(x => x.event === MESSAGETYPES.ADD_ROW_EVENT), takeUntil(this._unsubscribeRowAdd)).subscribe(x => {
             const date = (x.msg as string).split('T')[0];
             this.taskCnt[date] = (this.taskCnt[date] ?? 0) + 1;
             this.gridApi.redrawRows();
         });
-        this.messagingService.pipe(filter(x => x.event === 'resetTableEvent'), takeUntil(this._unsubscribeTableReset)).subscribe(x => {
+        this.messagingService.pipe(filter(x => x.event === MESSAGETYPES.RESET_TABLE_EVENT), takeUntil(this._unsubscribeTableReset)).subscribe(x => {
             this.countTasks(x.msg as Array<TodoAPI>);
             this.gridApi.redrawRows();
         });
@@ -124,7 +125,7 @@ export class CalendarViewComponent implements OnInit {
         return (params: CellClassParams): CellStyle => {
             let style = <CellStyle>{};
             if(params.value.split('-')[1] !== moment().add(this.monthOffset, 'month').format('MM')){
-                style['color'] = 'lightgray';
+                style['color'] = '#C8C8C8';
             }
             if(params.value === moment().format('YYYY-MM-DD')){
                 style['border'] = '1px solid';
@@ -148,5 +149,9 @@ export class CalendarViewComponent implements OnInit {
             return params.value.split('-')[2];
         }
 
+    }
+
+    onCellMouseOver(params: CellMouseOverEvent) {
+        this.messagingService.next({event: MESSAGETYPES.DATE_HOVER_EVENT, msg: params.value});
     }
 }
