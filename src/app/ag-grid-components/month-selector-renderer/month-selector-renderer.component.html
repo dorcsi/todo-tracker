@@ -1,0 +1,18 @@
+<mat-form-field class="year-selector">
+    <mat-select [formControl]="yearSelectorFormControl">
+        <mat-option *ngFor="let year of years" [value]="year">
+            {{year}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+<div class="month-select-row">
+    <div class="fa-angle-left fa-solid" (click)="getPrevMonth()"></div>
+    <mat-form-field class="month-selector">
+        <mat-select [formControl]="monthSelectorFormControl">
+            <mat-option *ngFor="let month of months" [value]="month.offset">
+                {{month.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div class="fa-angle-right fa-solid" (click)="getNextMonth()"></div>
+</div>
