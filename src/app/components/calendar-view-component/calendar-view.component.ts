@@ -23,7 +23,6 @@ export interface CalendarDates {
     templateUrl: './calendar-view.component.html'
 })
 export class CalendarViewComponent implements OnInit {
-    @Input() todoItems!: Array<TodoAPI>;
     private gridApi!: GridApi;
     private taskCnt: any;
     rowData!: Array<CalendarDates>;
@@ -81,7 +80,6 @@ export class CalendarViewComponent implements OnInit {
         this.frameworkComponents = {
             'monthSelectorRenderer': MonthSelectorRenderer
         }
-        this.countTasks();
     }
 
     ngOnDestroy() {
@@ -91,9 +89,9 @@ export class CalendarViewComponent implements OnInit {
         this._unsubscribeTableReset.complete();
     }
 
-    private countTasks(data?: Array<TodoAPI>) {
+    private countTasks(data: Array<TodoAPI>) {
         this.taskCnt = {};
-        (data ?? this.todoItems).forEach(todo => {
+        data.forEach(todo => {
             const date = todo.deadline.split('T')[0];
             this.taskCnt[date] = (this.taskCnt[date] ?? 0) + 1;
         });
@@ -124,6 +122,9 @@ export class CalendarViewComponent implements OnInit {
     getCellStyle() {
         return (params: CellClassParams): CellStyle => {
             let style = <CellStyle>{};
+            if(!this.taskCnt){
+                return style;
+            }
             if(params.value.split('-')[1] !== moment().add(this.monthOffset, 'month').format('MM')){
                 style['color'] = '#C8C8C8';
             }

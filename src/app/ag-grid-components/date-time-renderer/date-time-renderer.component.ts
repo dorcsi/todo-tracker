@@ -9,11 +9,6 @@ import { TodoAPI } from '../../app.component'
    selector: 'date-time-renderer',
    styleUrls: ['./date-time-renderer.component.scss'],
    templateUrl: './date-time-renderer.component.html'
-   /*template: `
-         <mat-form-field>
-            <input matInput type="datetime-local" placeholder="start date">
-        </mat-form-field>
-   `*/
 })
 export class DateTimeRenderer implements ICellRendererAngularComp {
     private gridApi = <GridApi>{};
@@ -24,7 +19,6 @@ export class DateTimeRenderer implements ICellRendererAngularComp {
     constructor(private messagingService: MessagingService){
     }
 
-    // gets called once before the renderer is used
     agInit(params: ICellRendererParams): void {
         this.gridApi = params.api;
         this.rowNode = params.node;
@@ -35,7 +29,6 @@ export class DateTimeRenderer implements ICellRendererAngularComp {
         });
     }
 
-    // gets called whenever the cell refreshes
     refresh(params: ICellRendererParams): boolean {
         return true;
     }

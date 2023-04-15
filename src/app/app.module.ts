@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { DeleteRowRenderer } from './ag-grid-components/delete-row-renderer/delete-row-renderer.component';
 import { DateTimeRenderer } from './ag-grid-components/date-time-renderer/date-time-renderer.component';
 import { CalendarViewComponent } from './components/calendar-view-component/calendar-view.component';
+import { ListViewComponent } from './components/list-view-component/list-view.component';
 import { MonthSelectorRenderer } from './ag-grid-components/month-selector-renderer/month-selector-renderer.component';
 import { MessagingService } from './messaging-service/messaging.service'
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -20,6 +21,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
    AppComponent,
    DeleteRowRenderer,
    DateTimeRenderer,
+   ListViewComponent,
    CalendarViewComponent,
    MonthSelectorRenderer
  ],

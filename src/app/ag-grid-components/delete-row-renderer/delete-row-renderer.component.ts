@@ -26,7 +26,6 @@ export class DeleteRowRenderer implements ICellRendererAngularComp {
         this.isPinnedRow = params.node.isRowPinned();
     }
 
-    // gets called whenever the cell refreshes
     refresh(params: ICellRendererParams): boolean {
         return true;
     }

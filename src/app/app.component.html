@@ -1,15 +1,6 @@
 
 <div class="details-container">
-    <ag-grid-angular
-        class="ag-theme-alpine task-grid"
-        [gridOptions]="gridOptions"
-        [columnDefs]="columnDefs"
-        [defaultColDef]="defaultColDef"
-        [rowData]="rowData"
-        [rowSelection]="'multiple'"
-        (gridReady)="onGridReady($event)"
-        (cellClicked)="onCellClicked($event)">
-    </ag-grid-angular>
+    <list-view (listGridApi)="listGridApi = $event"></list-view>
     <div class="right-panel">
         <i class="fa-solid fa-folder-open" (click)="openFile()">
             <input type="file" style="display:none" (change)="handleOpenFile($event)" name="fileInput"/>
@@ -17,8 +8,6 @@
         <i style="margin-left: 20px;" class="fa-solid fa-save" (click)="saveFile()">
             <a download="todos.json" style="display:none" id="fileDownload" click="getDownloadableContent()"></a>
         </i>
-        <calendar-view
-            [todoItems]="rowData">
-        </calendar-view>
+        <calendar-view/>
     </div>
 </div>

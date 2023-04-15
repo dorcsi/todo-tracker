@@ -28,7 +28,6 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
     constructor(private messagingService: MessagingService){
     }
 
-    // gets called once before the renderer is used
     agInit(params: ICellRendererParams): void {
         this.gridApi = params.api;
         for(let i = 0; i < 12; i++){
@@ -54,7 +53,6 @@ export class MonthSelectorRenderer implements ICellRendererAngularComp {
         });
     }
 
-    // gets called whenever the cell refreshes
     refresh(params: ICellRendererParams): boolean {
         return true;
     }
